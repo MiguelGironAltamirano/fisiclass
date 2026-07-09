@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Course } from "../../types";
 
 interface CourseCardProps {
@@ -6,11 +7,27 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ course, onOpen }: CourseCardProps) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
       <div className="h-32 relative">
-        <img src={course.image} alt={course.name} className="w-full h-full object-cover" />
-        <div className={`absolute inset-0 ${course.color} opacity-70`} />
+        {imgError ? (
+          <div className={`w-full h-full flex items-center justify-center ${course.color}`}>
+            <span className="material-symbols-outlined text-white text-4xl opacity-80">school</span>
+          </div>
+        ) : (
+          <>
+            <img
+              src={course.image}
+              alt={course.name}
+              className="w-full h-full object-cover"
+              onError={() => setImgError(true)}
+            />
+            <div className={`absolute inset-0 ${course.color} opacity-20`} />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0" />
+          </>
+        )}
         <span className="absolute bottom-2 left-3 font-label-sm text-label-sm text-white bg-black/30 px-2 py-0.5 rounded-full">
           {course.code}
         </span>

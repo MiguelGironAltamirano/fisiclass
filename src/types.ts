@@ -60,3 +60,16 @@ export interface Announcement {
   readonly course: string;
   readonly date: string;
 }
+export interface ModuleItem {
+  id: string;
+  type: "video" | "pdf" | "lectura";
+  title: string;
+  duration?: string;
+}
+
+export interface CourseModule {
+  id: string;
+  title: string;
+  week: number;
+  items: ModuleItem[];
+}

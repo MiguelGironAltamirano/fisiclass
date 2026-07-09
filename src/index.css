@@ -125,3 +125,28 @@ body {
     "GRAD" 0,
     "opsz" 24;
 }
+.dark {
+  --color-background: #1b1b1d;
+  --color-on-background: #e4e2e4;
+  --color-surface: #1b1b1d;
+  --color-on-surface: #e4e2e4;
+  --color-surface-container-lowest: #131315;
+  --color-surface-container-low: #1f1f21;
+  --color-surface-container: #232326;
+  --color-surface-container-high: #2c2c2f;
+  --color-surface-container-highest: #37373a;
+  --color-on-surface-variant: #c4c6ce;
+  --color-outline: #8e9099;
+  --color-outline-variant: #44474d;
+  --color-surface-variant: #44474d;
+  --color-inverse-surface: #e4e2e4;
+  --color-inverse-on-surface: #303032;
+  --color-surface-dim: #131315;
+  --color-surface-bright: #37373a;
+  --color-primary-container: #b6c7e7;
+  --color-on-primary-container: #0b1e36;
+  --color-on-primary: #0b1e36;
+  --color-primary: #d5e3ff;
+  --color-secondary-container: #454747;
+  --color-on-secondary-container: #e2e2e2;
+}

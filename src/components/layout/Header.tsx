@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CURRENT_USER, NOTIFICATIONS } from "../../data/mockData";
+import { useTheme } from "../../hooks/useTheme";
 import type { Role } from "../../types";
 
 interface HeaderProps {
@@ -13,8 +14,10 @@ interface HeaderProps {
 export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const user = CURRENT_USER[role];
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <header className="relative flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full bg-surface-container-lowest h-header-height border-b border-outline-variant shrink-0 z-30">
@@ -36,6 +39,15 @@ export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderP
         <h2 className="font-label-md text-label-md text-on-surface hidden sm:block">{title}</h2>
       </div>
       <div className="flex items-center gap-2 md:gap-4">
+        <button
+          className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full"
+          aria-label={theme === "light" ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
+          onClick={toggleTheme}
+        >
+          <span className="material-symbols-outlined">
+            {theme === "light" ? "dark_mode" : "light_mode"}
+          </span>
+        </button>
         <div className="relative">
           <button
             className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full relative"
@@ -64,7 +76,11 @@ export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderP
             </div>
           )}
         </div>
-        <button className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hidden sm:block" aria-label="Ayuda">
+        <button
+          className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hidden sm:block"
+          aria-label="Ayuda"
+          onClick={() => window.open("https://soporte.institucion.edu", "_blank", "noopener,noreferrer")}
+        >
           <span className="material-symbols-outlined">help_outline</span>
         </button>
         <div className="relative">
@@ -76,7 +92,12 @@ export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderP
               setNotifOpen(false);
             }}
           >
-            <img className="w-full h-full object-cover" src={user.avatar} alt={user.name} />
+            <img
+              className="w-full h-full object-cover"
+              src={avatarError ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff` : user.avatar}
+              alt={user.name}
+              onError={() => setAvatarError(true)}
+            />
           </button>
           {profileOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/50 overflow-hidden">

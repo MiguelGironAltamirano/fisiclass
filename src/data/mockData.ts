@@ -8,6 +8,7 @@ import type {
   NavItem,
   Role,
 } from "../types";
+import type { CourseModule } from "../types";
 
 export const NAV_ITEMS: Record<Role, readonly NavItem[]> = {
   docente: [
@@ -41,7 +42,7 @@ export const CURRENT_USER: Record<Role, { name: string; email: string; title: st
     email: "carlos.mendoza@institucion.edu",
     title: "Estudiante - Ingeniería de Sistemas, 6to ciclo",
     avatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAyOZ9y1x8Zdb6y1a4vQoZzq7sYh3o4qkq6Zc6b1n4o8k1y2Zq3q4o5p6r7s8t9u0v1w2x3y4z5a6b7c8d9e0f1g2h3i4j5k6l7m8n9o0",
+      "https://i.pravatar.cc/150?img=33",
   },
 };
 
@@ -190,3 +191,54 @@ export const NOTIFICATIONS = [
   { id: "n2", text: "Se aproxima la entrega de Sprint Review 2", time: "hace 1 h" },
   { id: "n3", text: "Coordinación Académica publicó un anuncio", time: "hace 3 h" },
 ];
+
+export const COURSE_MODULES: Record<string, readonly CourseModule[]> = {
+  c1: [
+    {
+      id: "c1-w1",
+      title: "Semana 1: Introducción",
+      week: 1,
+      items: [
+        { id: "c1-w1-v1", type: "video", title: "Bienvenida al curso", duration: "8:32" },
+        { id: "c1-w1-p1", type: "pdf", title: "Silabo del curso" },
+      ],
+    },
+    {
+      id: "c1-w3",
+      title: "Semana 3: Árboles y Grafos",
+      week: 3,
+      items: [
+        { id: "c1-w3-v1", type: "video", title: "Árboles binarios de búsqueda", duration: "22:10" },
+        { id: "c1-w3-l1", type: "lectura", title: "Lectura: Recorridos en grafos" },
+        { id: "c1-w3-p1", type: "pdf", title: "Guía de práctica 3" },
+      ],
+    },
+  ],
+  c2: [
+    {
+      id: "c2-w1",
+      title: "Semana 1: Límites",
+      week: 1,
+      items: [{ id: "c2-w1-v1", type: "video", title: "Introducción a límites", duration: "15:00" }],
+    },
+  ],
+  c3: [
+    {
+      id: "c3-w2",
+      title: "Semana 2: Metodologías Ágiles",
+      week: 2,
+      items: [
+        { id: "c3-w2-v1", type: "video", title: "Scrum en la práctica", duration: "18:45" },
+        { id: "c3-w2-p1", type: "pdf", title: "Plantilla de Sprint Review" },
+      ],
+    },
+  ],
+  c4: [
+    {
+      id: "c4-w1",
+      title: "Semana 1: Fundamentos de IA",
+      week: 1,
+      items: [{ id: "c4-w1-l1", type: "lectura", title: "Historia de la Inteligencia Artificial" }],
+    },
+  ],
+};
