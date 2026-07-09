@@ -143,10 +143,10 @@ body {
   --color-inverse-on-surface: #303032;
   --color-surface-dim: #131315;
   --color-surface-bright: #37373a;
-  --color-primary-container: #b6c7e7;
+  --color-primary-container: #6794ee;
   --color-on-primary-container: #0b1e36;
   --color-on-primary: #0b1e36;
-  --color-primary: #d5e3ff;
+  --color-primary: #a7c4ff;
   --color-secondary-container: #454747;
   --color-on-secondary-container: #e2e2e2;
 }

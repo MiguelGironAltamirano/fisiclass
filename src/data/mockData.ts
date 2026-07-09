@@ -38,11 +38,11 @@ export const CURRENT_USER: Record<Role, { name: string; email: string; title: st
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDFOzyWCJoQSBmC_Tld_eYVHBRl6Xnm0YgvVkgPRmlne-q2wiR9dWCOvSKX9gbYfdQzmrfoqVTf_3TWkQ0lJXkWXGlMNbFZRiuRaGOtpDh9ZwrciVBKKXNaycAbrSa8TlvpEhOry6bSnAp7ZSuYDXFul81H5hW_9otAtD1gfwfSsNbCkhuC04gUZviF_afX37O1VacIC7r3AbcoVW8I5fn2qlWTzg_QBXZTP8Ngc60n0pZs0a6My62cRYovXEvJc-8yYjPYV0Wxaw",
   },
   estudiante: {
-    name: "Carlos Mendoza",
-    email: "carlos.mendoza@institucion.edu",
+    name: "Nicola Porchella",
+    email: "nicola.porchella@institucion.edu",
     title: "Estudiante - Ingeniería de Sistemas, 6to ciclo",
     avatar:
-      "https://i.pravatar.cc/150?img=33",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-MPErq_OmoX1K143bfT5cSMdHGe_0BcRN3UmY6g7vD7p3ijxiz8wleoA&s=10",
   },
 };
 
