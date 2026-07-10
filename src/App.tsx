@@ -10,6 +10,7 @@ import { PanelCalificaciones } from "./pages/docente/PanelCalificaciones";
 import { MensajeriaAnuncios } from "./pages/docente/MensajeriaAnuncios";
 import { ConfigPerfilDocente } from "./pages/docente/ConfigPerfilDocente";
 import { DashboardEstudiante } from "./pages/estudiante/DashboardEstudiante";
+import { TareasKanban } from "./pages/estudiante/TareasKanban";
 import { MisCursos } from "./pages/estudiante/MisCursos";
 import { CalendarioAcademico } from "./pages/estudiante/CalendarioAcademico";
 import { MisCalificaciones } from "./pages/estudiante/MisCalificaciones";
@@ -18,6 +19,10 @@ import { ConfigPerfil } from "./pages/estudiante/ConfigPerfil";
 import { ToastProvider } from "./components/ui/Toast";
 import { ThemeProvider } from "./hooks/useTheme";
 import { ModuloViewer } from "./pages/estudiante/ModuloViewer";
+import { CursoDetalle } from "./pages/estudiante/CursoDetalle";
+import { ForoTopic } from "./pages/estudiante/ForoTopic";
+import { TareaDetalle } from "./pages/estudiante/TareaDetalle";
+import { QuizEngine } from "./pages/estudiante/QuizEngine";
 function App() {
   return (
     <ThemeProvider>
@@ -38,12 +43,17 @@ function App() {
 
         <Route element={<PrivateRoute allowedRole="estudiante" />}>
           <Route path="/estudiante/dashboard" element={<DashboardEstudiante />} />
+          <Route path="/estudiante/tareas" element={<TareasKanban />} />
           <Route path="/estudiante/cursos" element={<MisCursos />} />
           <Route path="/estudiante/calendario" element={<CalendarioAcademico />} />
           <Route path="/estudiante/calificaciones" element={<MisCalificaciones />} />
           <Route path="/estudiante/mensajes" element={<MensajesInternos />} />
           <Route path="/estudiante/configuracion" element={<ConfigPerfil />} />
+          <Route path="/estudiante/cursos/:courseId" element={<CursoDetalle />} />
           <Route path="/estudiante/cursos/:courseId/modulo/:itemId?" element={<ModuloViewer />} />
+          <Route path="/estudiante/cursos/:courseId/foro/:threadId" element={<ForoTopic />} />
+          <Route path="/estudiante/cursos/:courseId/tarea/:assignmentId" element={<TareaDetalle />} />
+          <Route path="/estudiante/cursos/:courseId/quiz/:quizId" element={<QuizEngine />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

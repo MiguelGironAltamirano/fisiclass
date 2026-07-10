@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "../../components/layout/AppShell";
 import { Breadcrumbs } from "../../components/ui/Breadcrumbs";
+import { EmptyState } from "../../components/ui/EmptyState";
 import { ESTUDIANTE_COURSES, COURSE_MODULES } from "../../data/mockData";
+import { useModuleProgress } from "../../hooks/useModuleProgress";
 import type { ModuleItem } from "../../types";
 
 const TYPE_CONFIG: Record<ModuleItem["type"], { icon: string; label: string }> = {
@@ -25,6 +27,13 @@ export function ModuloViewer() {
   const currentModule = modules.find((m) => m.items.some((i) => i.id === current?.id));
 
   const [expandedWeek, setExpandedWeek] = useState<string | undefined>(currentModule?.id);
+  const { completedIds, markCompleted } = useModuleProgress(courseId ?? "", modules);
+
+  // Marca automáticamente el ítem como completado en cuanto el estudiante lo visualiza.
+  useEffect(() => {
+    if (!current) return;
+    markCompleted(current.id);
+  }, [current?.id, markCompleted]);
 
   const selectItem = (item: ModuleItem, moduleId: string) => {
     setSelectedId(item.id);
@@ -35,9 +44,13 @@ export function ModuloViewer() {
   if (!course) {
     return (
       <AppShell role="estudiante" title="Curso no encontrado">
-        <p className="font-body-sm text-body-sm text-on-surface-variant">
-          No se encontró el curso solicitado.
-        </p>
+        <Breadcrumbs items={[{ label: "Mis Cursos", to: "/estudiante/cursos" }, { label: "Curso no encontrado" }]} />
+        <EmptyState
+          icon="school"
+          title="Curso no encontrado"
+          description="El curso que buscas no existe o ya no está disponible en tu matrícula."
+          action={{ label: "Volver a Mis Cursos", onClick: () => navigate("/estudiante/cursos") }}
+        />
       </AppShell>
     );
   }
@@ -45,25 +58,31 @@ export function ModuloViewer() {
   if (!current) {
     return (
       <AppShell role="estudiante" title={course.name}>
-        <Breadcrumbs items={[{ label: "Mis Cursos", to: "/estudiante/cursos" }, { label: course.name }]} />
-        <div className="flex flex-col items-center justify-center text-center py-16">
-          <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-3">inventory_2</span>
-          <h3 className="font-headline-sm text-headline-sm text-on-background mb-1">Sin contenido todavía</h3>
-          <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
-            Este curso aún no tiene módulos publicados. Vuelve más adelante.
-          </p>
-        </div>
+        <Breadcrumbs
+          items={[
+            { label: "Mis Cursos", to: "/estudiante/cursos" },
+            { label: course.name, to: `/estudiante/cursos/${courseId}` },
+            { label: "Contenido" },
+          ]}
+        />
+        <EmptyState
+          icon="inventory_2"
+          title="Sin contenido todavía"
+          description="Este curso aún no tiene módulos publicados. Vuelve más adelante."
+          action={{ label: "Volver al curso", onClick: () => navigate(`/estudiante/cursos/${courseId}`) }}
+        />
       </AppShell>
     );
   }
+
+  const isCompleted = completedIds.has(current.id);
 
   return (
     <AppShell role="estudiante" title={course.name}>
       <Breadcrumbs
         items={[
           { label: "Mis Cursos", to: "/estudiante/cursos" },
-          { label: course.name, to: "/estudiante/cursos" },
-          { label: currentModule?.title ?? "Módulo" },
+          { label: course.name, to: `/estudiante/cursos/${courseId}` },
           { label: current.title },
         ]}
       />
@@ -72,24 +91,26 @@ export function ModuloViewer() {
         {/* Panel principal de contenido */}
         <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
           <div className="p-6 sm:p-8">
-            <span className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-primary-container bg-primary-fixed px-2.5 py-1 rounded-full mb-4">
-              <span className="material-symbols-outlined text-[16px]">{TYPE_CONFIG[current.type].icon}</span>
-              {TYPE_CONFIG[current.type].label}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap mb-4">
+              <span className="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-on-primary-fixed bg-primary-fixed px-2.5 py-1 rounded-full">
+                <span className="material-symbols-outlined text-[16px]">{TYPE_CONFIG[current.type].icon}</span>
+                {TYPE_CONFIG[current.type].label}
+              </span>
+              {isCompleted && (
+                <span className="inline-flex items-center gap-1 font-label-sm text-label-sm text-success bg-success/10 px-2.5 py-1 rounded-full">
+                  <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                  Completado
+                </span>
+              )}
+            </div>
             <h1 className="font-headline-md text-headline-md text-on-background mb-2">{current.title}</h1>
             <p className="font-label-sm text-label-sm text-on-surface-variant mb-6">
               {currentModule?.title}
               {current.duration && ` · ${current.duration}`}
+              {current.estimatedMinutes && ` · ${current.estimatedMinutes} min estimados`}
             </p>
 
-            <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-10 flex flex-col items-center text-center">
-              <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-3">
-                {TYPE_CONFIG[current.type].icon}
-              </span>
-              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-xs">
-                El contenido de este {TYPE_CONFIG[current.type].label.toLowerCase()} se mostrará aquí una vez conectado al material del curso.
-              </p>
-            </div>
+            <ModuleItemContent item={current} courseColor={course.color} />
           </div>
 
           <div className="flex items-center justify-between px-6 sm:px-8 py-4 border-t border-outline-variant/40 bg-surface-container-low">
@@ -155,22 +176,27 @@ export function ModuloViewer() {
                       <ul className="pb-2">
                         {mod.items.map((item) => {
                           const isActive = current.id === item.id;
+                          const itemCompleted = completedIds.has(item.id);
                           return (
                             <li key={item.id}>
                               <button
                                 onClick={() => selectItem(item, mod.id)}
                                 className={`w-full flex items-center gap-2.5 pl-5 pr-4 py-2.5 text-left transition-colors ${
                                   isActive
-                                    ? "bg-primary-fixed text-primary-container"
+                                    ? "bg-primary-fixed text-on-primary-fixed"
                                     : "hover:bg-surface-container-low text-on-surface"
                                 }`}
                               >
                                 <span
                                   className={`material-symbols-outlined text-[18px] shrink-0 ${
-                                    isActive ? "text-primary-container" : "text-on-surface-variant"
+                                    isActive
+                                      ? "text-on-primary-fixed"
+                                      : itemCompleted
+                                        ? "text-success"
+                                        : "text-on-surface-variant"
                                   }`}
                                 >
-                                  {TYPE_CONFIG[item.type].icon}
+                                  {!isActive && itemCompleted ? "check_circle" : TYPE_CONFIG[item.type].icon}
                                 </span>
                                 <span className="font-body-sm text-body-sm truncate flex-1">{item.title}</span>
                                 {item.duration && (
@@ -192,6 +218,61 @@ export function ModuloViewer() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+/** Renderiza el contenido real del ítem según su tipo: video, pdf o lectura. */
+function ModuleItemContent({ item, courseColor }: { item: ModuleItem; courseColor: string }) {
+  if (item.type === "video" && item.videoUrl) {
+    return (
+      <div className={`rounded-lg overflow-hidden flex items-center justify-center ${courseColor}`}>
+        <video controls className="w-full max-h-[480px] bg-black" src={item.videoUrl}>
+          Tu navegador no soporta la reproducción de este video.
+        </video>
+      </div>
+    );
+  }
+
+  if (item.type === "pdf" && item.pdfUrl) {
+    return (
+      <div className="space-y-3">
+        <div className="rounded-lg border border-outline-variant/40 overflow-hidden">
+          <iframe src={item.pdfUrl} title={item.title} className="w-full h-[65vh] bg-surface-container-low" />
+        </div>
+        <a
+          href={item.pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 font-label-md text-label-md text-primary-container hover:underline"
+        >
+          <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+          Abrir en pestaña nueva
+        </a>
+      </div>
+    );
+  }
+
+  if (item.type === "lectura" && item.body) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-4 py-2">
+        {item.body.split("\n\n").map((paragraph, idx) => (
+          <p key={idx} className="font-body-md text-body-md text-on-surface leading-relaxed">
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-outline-variant/40 bg-surface-container-low p-10 flex flex-col items-center text-center">
+      <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-3">
+        {TYPE_CONFIG[item.type].icon}
+      </span>
+      <p className="font-body-sm text-body-sm text-on-surface-variant max-w-xs">
+        Este recurso no tiene contenido disponible por el momento.
+      </p>
+    </div>
   );
 }
 

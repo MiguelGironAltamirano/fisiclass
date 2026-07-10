@@ -44,7 +44,7 @@ export function MisCalificaciones() {
               </p>
             </div>
           </div>
-          <GradeTable rows={ESTUDIANTE_GRADES} showStudent={false} />
+          <GradeTable rows={ESTUDIANTE_GRADES} showStudent={false} expandable />
         </>
       )}
     </AppShell>
