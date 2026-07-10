@@ -1,32 +1,73 @@
-# React + TypeScript + Vite
+# Fisiclass — Aula Virtual
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Prototipo de aula virtual (LMS) para una institución universitaria. Cubre los
+flujos de **estudiante** y **docente**: dashboard, cursos, calendario,
+calificaciones, mensajería y perfil.
 
-Currently, two official plugins are available:
+> **Estado: prototipo.** No hay backend ni base de datos — todos los datos
+> (usuarios, cursos, calificaciones, mensajes, anuncios) viven en
+> `src/data/mockData.ts`. El login acepta cualquier correo válido +
+> contraseña de 6+ caracteres; la única credencial que falla a propósito es
+> la contraseña `wrongpass`, para poder demostrar el estado de error de la UI.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- **React 19** + **TypeScript**
+- **Vite** (bundler y dev server)
+- **React Router 7** (rutas y navegación protegida por rol)
+- **Tailwind CSS v4** con tokens de color inspirados en **Material 3**
+  (ver [`DESIGN.md`](./DESIGN.md))
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Cómo correrlo
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install       # instalar dependencias
+npm run dev       # servidor de desarrollo (Vite)
+npm run build     # type-check (tsc -b) + build de producción
+npm run preview   # sirve el build de producción localmente
+npm run lint      # oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Estructura de carpetas
+
+```
+src/
+├── App.tsx                  # rutas de la aplicación
+├── main.tsx                 # punto de entrada (React + Router)
+├── index.css                # tokens de diseño (Material 3) + Tailwind v4
+├── types.ts                 # tipos compartidos (Role, Course, GradeRow, ...)
+├── data/mockData.ts          # datos mock: usuarios, cursos, notas, mensajes...
+├── hooks/
+│   ├── useAuth.tsx           # sesión (rol) — persistida en localStorage
+│   ├── useTheme.tsx          # tema claro/oscuro — persistido en localStorage
+│   └── useSidebar.ts         # estado de la barra lateral (colapsada/móvil)
+├── components/
+│   ├── auth/PrivateRoute.tsx # guarda de rutas por rol
+│   ├── layout/                # AppShell, Header, Sidebar
+│   └── ui/                    # componentes reutilizables (ver DESIGN.md)
+└── pages/
+    ├── LoginPage.tsx / RecoveryPage.tsx   # públicas
+    ├── estudiante/                        # rutas del rol estudiante
+    └── docente/                           # rutas del rol docente
+```
+
+## Roles
+
+La app tiene dos roles con rutas y menús independientes, protegidos por
+`PrivateRoute`:
+
+| Rol | Rutas base | Pantallas |
+|-----|-----------|-----------|
+| **Estudiante** | `/estudiante/*` | Dashboard, Mis Cursos, Módulo, Calendario, Calificaciones, Mensajes, Perfil |
+| **Docente** | `/docente/*` | Dashboard, Gestión de Cursos, Calendario, Panel de Calificaciones, Mensajería/Anuncios, Perfil |
+
+El rol activo se elige en el login (`LoginPage.tsx`) y se persiste en
+`localStorage` mediante `useAuth` — al refrescar la página la sesión se
+mantiene hasta hacer logout explícito.
+
+## Documentación relacionada
+
+- [`DESIGN.md`](./DESIGN.md) — sistema de diseño: tokens de color/tipografía,
+  componentes de `src/components/ui/` y convenciones de UI.
+- [`DESCRIPTION.md`](./DESCRIPTION.md) — inventario original de pantallas y
+  flujos de usuario (documento de planeación, no se actualiza).

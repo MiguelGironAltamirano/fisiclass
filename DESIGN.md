@@ -1,128 +1,156 @@
-web application/stitch/projects/530048268269728490/screens/5607175521263968762
-## 1. Inventario de Pantallas (Vistas)
+# Sistema de Diseño — Fisiclass
 
-Estas son todas las interfaces que compondrán la aplicación, organizadas por el tipo de usuario que accederá a ellas.
+Guía de los tokens, componentes y convenciones de UI ya implementados en
+`src/`. No es un mockup ni un plan de pantallas (eso vive en
+[`DESCRIPTION.md`](./DESCRIPTION.md)) — este documento describe lo que
+**existe en el código hoy**, para que cualquiera pueda construir una pantalla
+nueva reusando las piezas correctas.
 
-**Vistas Comunes (Transversales)**
+## Quick path (cómo construir una pantalla nueva)
 
-- **Auth_Login:** Pantalla de inicio de sesión.
-- **Auth_Recovery:** Flujo de recuperación de contraseña.
-- **Global_Dashboard_Selector:** (Opcional) Pantalla de selección de rol si un usuario es docente y estudiante a la vez.
-- **User_Profile:** Configuración de perfil, avatar y preferencias de notificaciones.
-- **Global_Inbox:** Bandeja de mensajería interna directa.
-- **Global_Calendar:** Vista de calendario (mensual/semanal) con eventos consolidados.
+1. Envuelve el contenido en `<AppShell role={role} title="...">` (layout).
+2. Usa `<Breadcrumbs>` si la pantalla no es la raíz de una sección.
+3. Compón la vista con los componentes de `src/components/ui/` (tarjetas,
+   tablas, estados vacíos) en vez de escribir HTML suelto.
+4. Colores, tipografía, radios y espaciados: solo clases de Tailwind que
+   mapean a los tokens de abajo — nunca hex/px sueltos en `className`.
+5. Iconos: `material-symbols-outlined` (ver convención más abajo), nunca SVGs
+   ni otra librería de iconos.
 
-**Vistas del Estudiante**
+## Tokens de diseño
 
-- **Student_Dashboard:** Resumen general (clases del día, tareas próximas a vencer, notificaciones recientes).
-- **Student_CourseList:** Cuadrícula o lista de cursos matriculados en el ciclo actual.
-- **Student_CourseDetail:** Home del curso con el sílabo, anuncios y progreso general.
-- **Student_ModuleViewer:** Interfaz de consumo de contenido (reproductor de video, visor de PDF, lecturas).
-- **Student_AssignmentDetail:** Pantalla con las instrucciones de la tarea, rúbrica y la zona de subida de archivos (`Drag & Drop`).
-- **Student_QuizEngine:** Interfaz aislada para la toma de exámenes (con temporizador, paginación de preguntas y estado de conexión).
-- **Student_GradesBook:** Historial de calificaciones filtrable por curso y periodo académico.
-- **Student_ForumTopic:** Vista de un hilo de discusión para leer y responder.
+Todos los tokens viven en `src/index.css`, definidos con `@theme` (Tailwind
+v4) y sobrescritos para modo oscuro bajo `.dark { ... }`. El tema se activa
+con la clase `.dark` en `<html>`, controlada por `useTheme` (ver
+`src/hooks/useTheme.tsx`).
 
-**Vistas del Docente**
+### Paleta de color (Material 3)
 
-- **Teacher_Dashboard:** Panel de control con alertas críticas (entregas pendientes de calificar, mensajes no leídos, accesos recientes).
-- **Teacher_CourseList:** Cursos asignados para la enseñanza en el ciclo.
-- **Teacher_CourseBuilder:** Interfaz de edición drag-and-drop para estructurar módulos, subir archivos y reorganizar el sílabo.
-- **Teacher_AssignmentCreator:** Formulario avanzado para crear tareas (fechas de corte, métodos de entrega, creación de rúbricas).
-- **Teacher_QuizBuilder:** Creador de evaluaciones (banco de preguntas, configuración de aleatoriedad, peso de las notas).
-- **Teacher_GradingPanel:** Interfaz de calificación (vista dividida: trabajo del alumno a la izquierda, rúbrica y caja de feedback a la derecha).
-- **Teacher_StudentRoster:** Lista de alumnos matriculados, seguimiento de asistencia (si aplica) y métricas de riesgo de abandono.
-- **Teacher_CourseReports:** Panel de analíticas del curso (promedios, preguntas con mayor tasa de fallo).
+Los nombres de color siguen los **roles de color de Material 3**: cada rol
+tiene una superficie (`primary`, `secondary`, `tertiary`, `error`, ...), su
+contenedor (`*-container`, tono suave para fondos) y el color de contenido
+sobre esa superficie (`on-*`). Uso típico:
 
-## 2. Inventario de Flujos de Usuario Principales
+| Rol | Base | Contenedor | Contenido (`on-*`) |
+|-----|------|-----------|---------------------|
+| Primary | `text-primary` / `bg-primary` | `bg-primary-container` (sidebar, botones principales) | `text-on-primary-container` |
+| Secondary | `bg-secondary` | `bg-secondary-container` | `text-on-secondary-container` |
+| Tertiary | `bg-tertiary` | `bg-tertiary-container` | `text-on-tertiary-container` |
+| Error | `text-error` (validación, alertas) | `bg-error-container` | `text-on-error-container` |
+| Semántico | `warning`, `success` — mismos valores en claro/oscuro (ya cumplen contraste AA) | — | texto blanco (`on-error`) |
 
-Estos son los caminos lógicos que los usuarios recorrerán interactuando con las pantallas anteriores.
+**Superficies** (fondos y jerarquía de elevación): `background`, `surface`,
+`surface-container-lowest` → `surface-container-highest` (de menos a más
+"elevado"), `surface-variant`, `surface-dim`, `surface-bright`. Texto sobre
+superficie: `on-surface`, `on-surface-variant` (texto secundario/atenuado).
 
-**Flujos de Autenticación y Configuración**
+**Inversos** (`inverse-surface`, `inverse-on-surface`, `inverse-primary`):
+para elementos que deben leerse sobre un fondo "invertido" respecto al tema
+activo (ej. un tooltip oscuro en tema claro). `surface-tint`: tono de acento
+usado para simular elevación (Material 3 lo usa para tintar superficies
+elevadas con el color primario).
 
-1. **Flujo de Acceso Seguro:** Desde el ingreso de credenciales hasta la redirección al Dashboard correspondiente (incluye recuperación de contraseña).
-2. **Flujo de Actualización de Perfil:** Modificación de datos de contacto y preferencias de interfaz (modo oscuro/claro, idioma).
+**Roles "Fixed"** (`primary-fixed`, `primary-fixed-dim`, `on-primary-fixed`,
+`on-primary-fixed-variant` y sus equivalentes `secondary-*` / `tertiary-*`):
+por especificación de Material 3 son colores que **no cambian entre tema
+claro y oscuro** — de ahí el nombre "fixed". Por eso `src/index.css` no los
+redefine dentro de `.dark { ... }`; sería un error hacerlo. Ejemplo real en
+el código: el blob decorativo de `LoginPage.tsx` usa `bg-secondary-fixed`
+precisamente porque debe verse igual sin importar el tema.
 
-**Flujos del Estudiante**
-3.  **Flujo de Consumo de Clase:** Navegación desde el Dashboard > Selección de Curso > Módulo Específico > Visualización del material de estudio.
-4.  **Flujo de Entrega de Asignación:** Revisión de instrucciones > Subida de archivo(s) > Confirmación de envío > Recepción de comprobante.
-5.  **Flujo de Evaluación Síncrona:** Ingreso al examen > Resolución de preguntas > Guardado automático > Envío final de evaluación.
-6.  **Flujo de Consulta de Rendimiento:** Acceso al libro de calificaciones > Revisión de feedback detallado de una tarea específica.
+**Deshabilitado**: `disabled` (`text-disabled` / `bg-disabled`) — tiene su
+propio tono por tema; no se le exige AA 4.5:1 porque WCAG exime a los
+controles deshabilitados de ese requisito, pero sigue siendo legible (≥3:1)
+en ambos temas.
 
-**Flujos del Docente**
-7.  **Flujo de Diseño Curricular:** Acceso al curso > Creación de nuevo módulo > Subida de material multimedia > Publicación para los estudiantes.
-8.  **Flujo de Diseño de Evaluaciones:** Creación de tarea/examen > Configuración de parámetros de calificación > Programación de disponibilidad.
-9.  **Flujo de Calificación Continua:** Acceso a entregas pendientes > Uso de rúbrica para evaluar > Ingreso de comentarios > Publicación de notas al estudiante.
-10. **Flujo de Moderación y Comunicación:** Envío de anuncio masivo al curso o respuesta a foros de dudas.
+> Todos los tokens con variante clara que necesitan un tono distinto en
+> oscuro están cubiertos en `.dark { ... }` con contraste AA verificado
+> (≥4.5:1 en texto, ≥3:1 en componentes grandes/iconos). Los que faltan a
+> propósito son los roles "Fixed" descritos arriba.
 
-## 1. Flujos de Autenticación y Configuración
+### Tipografía
 
-### Flujo 1: Acceso Seguro
+Fuente: `Hanken Grotesk` (cargada en `index.html` vía Google Fonts, con
+fallback a `ui-sans-serif, system-ui, sans-serif`), token `--font-sans`.
 
-- **Transición:** `Auth_Login` → `Global_Dashboard_Selector` (si aplica) → `Student_Dashboard` o `Teacher_Dashboard`.
-- **Descripción:** El usuario ingresa sus credenciales en un formulario limpio sobre fondo crema pastel. Al hacer clic en "Ingresar" (botón azul oscuro), el sistema valida la información.
-- **Heurísticas Aplicadas:**
-    - *Visibilidad del estado del sistema:* Al hacer clic, el botón muestra un *spinner* de carga para indicar que la petición está en proceso.
-    - *Prevención de errores:* El botón de "Ingresar" se mantiene deshabilitado hasta que ambos campos (correo y contraseña) tengan formato válido.
-    - *Ayudar a reconocer y recuperar errores:* Si la contraseña es incorrecta, se muestra un mensaje de error en línea (texto en rojo suave) debajo del campo, no un pop-up genérico.
+Clases utilitarias combinadas (tamaño + interlineado + peso). Usar **la
+misma clase para tamaño y color de texto** — ej. `font-headline-md
+text-headline-md`:
 
-### Flujo 2: Actualización de Perfil
+| Clase | Tamaño / interlineado | Peso | Uso |
+|-------|------------------------|------|-----|
+| `headline-lg` | 32px / 40px | 700 | Título de página principal |
+| `headline-md` | 24px / 32px | 600 | Título de sección / logo sidebar |
+| `headline-sm` | 20px / 28px | 600 | Título de tarjeta / card |
+| `body-lg` | 18px / 28px | 400 | Texto destacado |
+| `body-md` | 16px / 24px | 400 | Texto de formulario / párrafo |
+| `body-sm` | 14px / 20px | 400 | Texto secundario |
+| `label-md` | 14px / 20px | 600 | Botones, labels de input |
+| `label-sm` | 12px / 16px | 600 | Badges, ayudas, breadcrumbs |
 
-- **Transición:** Cualquier pantalla (vía menú lateral o header) → `User_Profile`.
-- **Descripción:** El usuario modifica su foto o correo de contacto.
-- **Heurísticas Aplicadas:**
-    - *Control y libertad del usuario:* Si el usuario cambia una foto pero se arrepiente, tiene un botón claro de "Cancelar" o "Deshacer" antes de guardar los cambios.
-    - *Visibilidad del estado del sistema:* Al guardar, aparece un *toast notification* en la esquina superior confirmando "Perfil actualizado exitosamente".
+### Radios, espaciado y layout
 
-## 2. Flujos del Estudiante
+- Radios: `rounded` (0.25rem, default), `rounded-lg` (0.5rem, tarjetas e
+  inputs), `rounded-xl` (0.75rem, contenedores de página), `rounded-full`
+  (avatares, badges, iconos circulares).
+- Espaciado de layout: `gap-gutter` / `p-gutter` (1.5rem, separación entre
+  bloques de una página), `p-margin-mobile` (1rem) / `p-margin-desktop`
+  (2.5rem, padding del `<main>` en `AppShell`), `gap-stack-gap` (1rem).
+- Sidebar: `w-sidebar-expanded` (260px) / `w-sidebar-collapsed` (80px),
+  sincronizado con el margen del contenido (`md:ml-sidebar-expanded` /
+  `-collapsed`) para que el layout no se rompa al colapsar.
+- Header: `h-header-height` (64px).
 
-### Flujo 3: Consumo de Clase
+## Componentes (`src/components/ui/`)
 
-- **Transición:** `Student_Dashboard` → `Student_CourseList` → `Student_CourseDetail` → `Student_ModuleViewer`.
-- **Descripción:** El alumno usa el menú lateral colapsable para ir a sus cursos. Entra al curso deseado, ve el sílabo y abre el módulo de la semana.
-- **Heurísticas Aplicadas:**
-    - *Reconocimiento antes que recuerdo:* En la parte superior de `Student_ModuleViewer`, se usan **Breadcrumbs** (Ej: *Cursos > Matemáticas > Semana 3 > Video*). El alumno siempre sabe dónde está sin tener que memorizar su ruta.
-    - *Consistencia y estándares:* Los íconos de los materiales siempre usan el mismo lenguaje visual (un ícono de "reproductor" azul oscuro siempre es un video; un ícono de "documento" es un PDF).
+| Componente | Propósito | Notas de uso |
+|------------|-----------|--------------|
+| **Toast** (`Toast.tsx`) | Notificaciones flotantes (`success` / `error` / `info`), auto-descartables a los 3s. | Se consume con `useToast().showToast(mensaje, tipo)`. Requiere `<ToastProvider>` en el árbol (ya está en `App.tsx`). |
+| **EmptyState** (`EmptyState.tsx`) | Estado vacío genérico: ícono + título + descripción + acción opcional. | Usar en listas sin datos (cursos sin matricular, bandeja vacía, etc.) en vez de dejar la sección en blanco. |
+| **Breadcrumbs** (`Breadcrumbs.tsx`) | Ruta de navegación jerárquica (`items: {label, to?}[]`). | El último item nunca es link (es la página actual). |
+| **StatCard** (`StatCard.tsx`) | Tarjeta de métrica con ícono, valor, etiqueta, badge opcional y botón de acción. | `variant`: `primary` (CTA principal), `outline` (default), `ghost` (acción secundaria). |
+| **CourseCard** (`CourseCard.tsx`) | Tarjeta de curso con imagen (con *fallback* a ícono si la imagen falla), color de acento y progreso. | Usado en `MisCursos` / `GestionCursos`. |
+| **GradeTable** (`GradeTable.tsx`) | Tabla de calificaciones con estado (`calificado` / `pendiente` / `atrasado`) codificado por color. | `showStudent` muestra columna de alumno (vista docente); `editable` habilita edición de notas inline. |
+| **CalendarGrid** (`CalendarGrid.tsx`) | Calendario mensual con eventos tipados (`examen` / `entrega` / `clase` / `evento`), cada tipo con su color. | Lee eventos de `mockData.CALENDAR_EVENTS`; navegación mes anterior/siguiente interna. |
+| **AnnouncementsPanel** (`AnnouncementsPanel.tsx`) | Panel de anuncios: formulario de publicación (docente) + listado. | Estado local, no persiste entre recargas (prototipo). |
+| **MessagesPanel** (`MessagesPanel.tsx`) | Mensajería interna estilo chat: lista de hilos + conversación activa. | Estado local por hilo (`Record<threadId, ChatMessage[]>`). |
+| **ProfileForm** (`ProfileForm.tsx`) | Formulario de perfil (nombre, correo, cargo/programa, idioma) + cambio de foto. | La foto se previsualiza en el cliente con `URL.createObjectURL` (no se sube a ningún servidor); "Cancelar" revierte también la foto. |
 
-### Flujo 4: Entrega de Asignación
+### Layout (`src/components/layout/`)
 
-- **Transición:** `Student_CourseDetail` → `Student_AssignmentDetail`.
-- **Descripción:** El estudiante lee las instrucciones, arrastra su archivo al área designada y envía su trabajo.
-- **Heurísticas Aplicadas:**
-    - *Prevención de errores:* Antes de procesar el envío, salta un **diálogo de confirmación** ("¿Estás seguro de enviar esta tarea? Solo tienes 1 intento"). Además, el área de *Drag & Drop* rechaza visualmente archivos que no coinciden con el formato permitido (ej. sube un `.exe` cuando se pide `.pdf`).
-    - *Visibilidad del estado del sistema:* Durante la subida del archivo, aparece una barra de progreso real (0% a 100%).
+- **AppShell**: envoltorio de página autenticada (`role`, `title`,
+  `children`) — combina `Sidebar` + `Header` + `<main>` con el padding y
+  scroll estándar. Toda pantalla protegida se monta dentro de un `AppShell`.
+- **Sidebar**: navegación lateral por rol (`NAV_ITEMS[role]` en
+  `mockData.ts`), colapsable en desktop y tipo *drawer* en móvil.
+- **Header**: barra superior con título de página, toggle de sidebar/tema y
+  menú de usuario.
 
-### Flujo 5: Evaluación Síncrona
+### Auth (`src/components/auth/`)
 
-- **Transición:** `Student_CourseDetail` → `Student_QuizEngine`.
-- **Descripción:** El alumno inicia un examen. Responde pregunta por pregunta, el sistema guarda automáticamente y envía la evaluación.
-- **Heurísticas Aplicadas:**
-    - *Visibilidad del estado del sistema:* Un temporizador fijo en la pantalla y un indicador de "Guardado hace 10 segundos" o "Sin conexión" mantienen al alumno informado.
-    - *Flexibilidad y eficiencia de uso:* Un panel lateral o inferior permite saltar rápidamente entre preguntas numeradas.
-    - *Prevención de errores:* Si el alumno intenta enviar el examen con preguntas en blanco, una alerta modal le avisa de las preguntas exactas que le faltan.
+- **PrivateRoute** (`allowedRole`): si no hay sesión redirige a `/`; si el
+  rol no coincide, redirige al dashboard del rol correcto. La sesión la
+  provee `useAuth` (persistida en `localStorage`, ver `README.md`).
 
-## 3. Flujos del Docente
+## Convenciones
 
-### Flujo 6: Diseño Curricular y Subida de Material
-
-- **Transición:** `Teacher_Dashboard` → `Teacher_CourseList` → `Teacher_CourseBuilder`.
-- **Descripción:** El profesor entra al modo edición del curso, crea una nueva "Semana 4" y arrastra recursos (PDFs, enlaces) dentro de ella.
-- **Heurísticas Aplicadas:**
-    - *Flexibilidad y eficiencia de uso:* La capacidad de reordenar módulos arrastrándolos (*Drag & Drop*) acelera el trabajo para usuarios expertos.
-    - *Visibilidad del estado del sistema:* Los módulos tienen etiquetas visuales claras ("Borrador" en gris o "Publicado" en azul oscuro) para que el profesor sepa instantáneamente qué ven los alumnos.
-
-### Flujo 7: Diseño de Evaluaciones
-
-- **Transición:** `Teacher_CourseBuilder` → `Teacher_AssignmentCreator`.
-- **Descripción:** El docente llena un formulario para crear una tarea, estableciendo fechas y rúbricas.
-- **Heurísticas Aplicadas:**
-    - *Prevención de errores:* El calendario bloquea (deshabilita) las fechas pasadas. Además, la "Fecha de cierre" no puede ser lógicamente anterior a la "Fecha de inicio".
-    - *Relación entre el sistema y el mundo real:* El uso de términos educativos estándar (Rúbrica, Plazo de gracia, Ponderación) en lugar de jerga de base de datos.
-
-### Flujo 8: Calificación Continua
-
-- **Transición:** `Teacher_Dashboard` (clic en notificación de "10 entregas pendientes") → `Teacher_GradingPanel`.
-- **Descripción:** El docente entra a la vista dividida. A la izquierda ve el PDF del alumno; a la derecha, la rúbrica y la caja de comentarios.
-- **Heurísticas Aplicadas:**
-    - *Reconocimiento antes que recuerdo:* El docente no tiene que abrir el PDF en una ventana y la rúbrica en otra; la vista dividida (*Split View*) mantiene toda la información contextual a la vista.
-    - *Control y libertad del usuario:* Botones para "Guardar borrador" (si el docente no ha terminado de evaluar) y "Publicar nota".
+- **Iconografía**: únicamente [Material Symbols
+  Outlined](https://fonts.google.com/icons) vía la clase
+  `.material-symbols-outlined` (cargada como fuente variable en
+  `index.html`). Para iconos "rellenos" (ej. el ícono del sidebar o el badge
+  de `StatCard`) se usa `style={{ fontVariationSettings: "'FILL' 1" }}`
+  inline sobre el mismo span — no hay una clase utilitaria para esto todavía.
+- **Fallback de imágenes**: tanto `CourseCard` como `ProfileForm` manejan
+  `onError` en el `<img>` para degradar a un ícono o a un avatar generado
+  (`src/utils/avatar.tsx` → `ui-avatars.com`) en vez de mostrar una imagen
+  rota — replicar este patrón en cualquier imagen que dependa de una URL
+  externa o de datos mock.
+- **Estado como fuente de la verdad**: no hay backend; cada pantalla mock
+  gestiona su propio estado local (`useState`) inicializado desde
+  `src/data/mockData.ts`. Los cambios (anuncios, mensajes, notas) no
+  persisten entre recargas salvo tema (`useTheme`) y sesión (`useAuth`), que
+  sí usan `localStorage`.
+- **Patrón de página**: página = `AppShell` + (`Breadcrumbs` opcional) +
+  composición de componentes de `ui/`. Evitar estilos ad-hoc que dupliquen un
+  componente ya existente (por ejemplo, no reconstruir una tarjeta de
+  métrica a mano — usar `StatCard`).
