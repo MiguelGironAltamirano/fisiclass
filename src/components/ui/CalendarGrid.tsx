@@ -11,7 +11,7 @@ const MONTH_NAMES = [
 const TYPE_STYLES: Record<CalendarEvent["type"], string> = {
   examen: "bg-error/10 text-error",
   entrega: "bg-warning/10 text-warning",
-  clase: "bg-primary-fixed text-primary-container",
+  clase: "bg-primary-fixed text-on-primary-fixed",
   evento: "bg-success/10 text-success",
 };
 

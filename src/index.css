@@ -126,6 +126,7 @@ body {
     "opsz" 24;
 }
 .dark {
+  /* Superficies y neutros */
   --color-background: #1b1b1d;
   --color-on-background: #e4e2e4;
   --color-surface: #1b1b1d;
@@ -143,10 +144,66 @@ body {
   --color-inverse-on-surface: #303032;
   --color-surface-dim: #131315;
   --color-surface-bright: #37373a;
+  --color-disabled: #8b8b93;
+
+  /* Primary (tonos 80/60 sobre superficie oscura, AA verificado) */
   --color-primary-container: #6794ee;
   --color-on-primary-container: #0b1e36;
   --color-on-primary: #0b1e36;
   --color-primary: #a7c4ff;
+  --color-surface-tint: #a7c4ff;
+  --color-inverse-primary: #0b1e36;
+
+  /* Secondary (tono 80 neutro sobre superficie oscura) */
+  --color-secondary: #c6c6c7;
+  --color-on-secondary: #1a1c1c;
   --color-secondary-container: #454747;
   --color-on-secondary-container: #e2e2e2;
+
+  /* Tertiary (tono 90/40 cálido, análogo al tratamiento de primary) */
+  --color-tertiary: #e5dfd3;
+  --color-on-tertiary: #201e19;
+  --color-tertiary-container: #9a8b76;
+  --color-on-tertiary-container: #201e19;
+
+  /* Error: contenedor invertido a tono 20/85; el rojo base y "on-error"
+     (texto blanco) ya cumplen AA en ambos temas, por eso no se redefinen. */
+  --color-error-container: #5c1a16;
+  --color-on-error-container: #ffb4ab;
+
+  /* warning / success / on-error se mantienen igual que en modo claro:
+     su contraste (>=4.5:1 sobre el fondo oscuro) ya cumple AA sin ajuste. */
+
+  /*
+   * Roles "Fixed" (primary-fixed(-dim), secondary-fixed(-dim),
+   * tertiary-fixed(-dim) y sus on-*-fixed/-fixed-variant) se omiten a
+   * propósito: por especificación Material 3 son colores CONSTANTES que no
+   * cambian entre temas claro/oscuro (p. ej. el acento decorativo del blob
+   * en LoginPage usa bg-secondary-fixed y debe verse igual en ambos temas).
+   */
+}
+
+/* ------------------------------------------------------------------ */
+/* Transición de página: fade + slide-up sutil al cambiar de ruta.    */
+/* ------------------------------------------------------------------ */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-enter 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
 }

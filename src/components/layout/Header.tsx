@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CURRENT_USER, NOTIFICATIONS } from "../../data/mockData";
+import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import type { Role } from "../../types";
 
@@ -9,15 +10,18 @@ interface HeaderProps {
   readonly title: string;
   readonly onToggleSidebar: () => void;
   readonly onToggleMobile: () => void;
+  readonly onOpenSearch: () => void;
 }
 
-export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderProps) {
+export function Header({ role, title, onToggleSidebar, onToggleMobile, onOpenSearch }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(NOTIFICATIONS.length);
   const user = CURRENT_USER[role];
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
 
   return (
     <header className="relative flex justify-between items-center px-margin-mobile md:px-margin-desktop w-full bg-surface-container-lowest h-header-height border-b border-outline-variant shrink-0 z-30">
@@ -38,6 +42,20 @@ export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderP
         </button>
         <h2 className="font-label-md text-label-md text-on-surface hidden sm:block">{title}</h2>
       </div>
+      <div className="flex-1 flex justify-center px-4">
+        <button
+          type="button"
+          onClick={onOpenSearch}
+          aria-label="Buscar"
+          className="hidden sm:flex items-center gap-2 w-full max-w-72 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors"
+        >
+          <span className="material-symbols-outlined text-[18px] shrink-0">search</span>
+          <span className="font-body-sm text-body-sm truncate">Buscar…</span>
+          <kbd className="ml-auto font-label-sm text-label-sm bg-surface-container-high px-1.5 py-0.5 rounded shrink-0">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
       <div className="flex items-center gap-2 md:gap-4">
         <button
           className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full"
@@ -53,12 +71,20 @@ export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderP
             className="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full relative"
             aria-label="Notificaciones"
             onClick={() => {
-              setNotifOpen((v) => !v);
+              setNotifOpen((v) => {
+                const next = !v;
+                if (next) setUnreadCount(0);
+                return next;
+              });
               setProfileOpen(false);
             }}
           >
             <span className="material-symbols-outlined">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full" />
+            {unreadCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center bg-error text-on-error font-label-sm text-[10px] leading-none rounded-full">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-80 max-w-[90vw] bg-surface-container-lowest rounded-xl shadow-lg border border-outline-variant/50 overflow-hidden">
@@ -117,7 +143,11 @@ export function Header({ role, title, onToggleSidebar, onToggleMobile }: HeaderP
               </button>
               <button
                 className="w-full text-left px-4 py-2.5 font-body-sm text-body-sm text-error hover:bg-surface-container-low transition-colors flex items-center gap-2"
-                onClick={() => navigate("/")}
+                onClick={() => {
+                  setProfileOpen(false);
+                  logout();
+                  navigate("/");
+                }}
               >
                 <span className="material-symbols-outlined text-[18px]">logout</span>
                 Cerrar sesión

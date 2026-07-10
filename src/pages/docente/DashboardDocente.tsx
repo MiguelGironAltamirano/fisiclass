@@ -31,7 +31,7 @@ export function DashboardDocente() {
         <StatCard
           icon="mark_email_unread"
           iconBg="bg-primary-fixed"
-          iconColor="text-primary-container"
+          iconColor="text-on-primary-fixed"
           value="12"
           label="Mensajes de alumnos no leídos"
           actionLabel="Revisar Bandeja"

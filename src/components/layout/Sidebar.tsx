@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { NAV_ITEMS } from "../../data/mockData";
-import type { Role } from "../../types";
+import type { NavItem, Role } from "../../types";
 
 interface SidebarProps {
   readonly role: Role;
@@ -10,8 +10,12 @@ interface SidebarProps {
   readonly onLogout: () => void;
 }
 
+/** Entrada adicional del estudiante: vive solo en el shell de navegación, no en NAV_ITEMS (mockData es de solo lectura). */
+const STUDENT_EXTRA_ITEM: NavItem = { label: "Tareas", icon: "assignment", path: "/estudiante/tareas" };
+
 export function Sidebar({ role, collapsed, mobileOpen, onCloseMobile, onLogout }: SidebarProps) {
-  const items = NAV_ITEMS[role];
+  const items =
+    role === "estudiante" ? [NAV_ITEMS[role][0], STUDENT_EXTRA_ITEM, ...NAV_ITEMS[role].slice(1)] : NAV_ITEMS[role];
   const width = collapsed ? "w-sidebar-collapsed" : "w-sidebar-expanded";
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { CURRENT_USER } from "../../data/mockData";
 import { useToast } from "../ui/Toast";
 import type { Role } from "../../types";
@@ -15,11 +15,29 @@ export function ProfileForm({ role }: ProfileFormProps) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [title, setTitle] = useState(user.title);
-  
+
   const [avatarError, setAvatarError] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [language, setLanguage] = useState("es");
   const hasChanges =
-    name !== user.name || email !== user.email || title !== user.title;
+    name !== user.name || email !== user.email || title !== user.title || avatarPreview !== null;
+
+  // Vista previa local: no se sube a ningún servidor, es solo un objeto
+  // en memoria del navegador. Se revoca al cambiar de blob o al desmontar,
+  // sin importar si el usuario guardó o canceló.
+  useEffect(() => {
+    if (!avatarPreview) return;
+    return () => URL.revokeObjectURL(avatarPreview);
+  }, [avatarPreview]);
+
+  const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+    setAvatarError(false);
+  };
 
   const save = () => {
     showToast("Perfil actualizado exitosamente", "success");
@@ -29,6 +47,7 @@ export function ProfileForm({ role }: ProfileFormProps) {
     setName(user.name);
     setEmail(user.email);
     setTitle(user.title);
+    setAvatarPreview(null);
   };
 
   return (
@@ -36,7 +55,13 @@ export function ProfileForm({ role }: ProfileFormProps) {
       <div className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-6 flex flex-col items-center text-center h-fit">
         <img
           className="w-full h-full object-cover"
-          src={avatarError ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff` : user.avatar}
+          src={
+            avatarPreview
+              ? avatarPreview
+              : avatarError
+                ? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff`
+                : user.avatar
+          }
           alt={user.name}
           onError={() => setAvatarError(true)}
         />
@@ -46,7 +71,7 @@ export function ProfileForm({ role }: ProfileFormProps) {
             type="file"
             accept="image/png,image/jpeg"
             className="hidden"
-            onChange={() => showToast("Vista previa no disponible en este prototipo", "info")}
+            onChange={handlePhotoChange}
           />
         </label>
         <p className="font-label-sm text-label-sm text-on-surface-variant">JPG o PNG, máx. 2MB</p>

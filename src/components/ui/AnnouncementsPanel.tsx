@@ -69,7 +69,7 @@ export function AnnouncementsPanel() {
         {announcements.map((a) => (
           <div key={a.id} className="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-5">
             <div className="flex justify-between items-start mb-2">
-              <span className="font-label-sm text-label-sm px-2 py-1 rounded-full bg-primary-fixed text-primary-container">
+              <span className="font-label-sm text-label-sm px-2 py-1 rounded-full bg-primary-fixed text-on-primary-fixed">
                 {a.course}
               </span>
               <span className="font-label-sm text-label-sm text-on-surface-variant">{a.date}</span>
