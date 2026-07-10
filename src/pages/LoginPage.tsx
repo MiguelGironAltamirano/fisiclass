@@ -5,6 +5,11 @@ import type { Role } from "../types";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Credenciales demo del prototipo: cualquier correo válido + contraseña
+// de 6+ caracteres funciona, EXCEPTO la contraseña literal "wrongpass",
+// que siempre falla — para poder demostrar el estado de error de la UI.
+const INVALID_DEMO_PASSWORD = "wrongpass";
+
 export function LoginPage() {
   const { login } = useAuth();
   const [role, setRole] = useState<Role>("estudiante");
@@ -27,6 +32,10 @@ export function LoginPage() {
     // Simulación de validación con backend — reemplazar por la petición real de autenticación
     setTimeout(() => {
       setLoading(false);
+      if (password === INVALID_DEMO_PASSWORD) {
+        setError("Correo o contraseña incorrectos. Verifica tus datos e intenta nuevamente.");
+        return;
+      }
       login(role);
     }, 900);
   };
