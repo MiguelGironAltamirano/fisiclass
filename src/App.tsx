@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RecoveryPage } from "./pages/RecoveryPage";
 import { DashboardDocente } from "./pages/docente/DashboardDocente";
 import { GestionCursos } from "./pages/docente/GestionCursos";
+import { DocenteCursoDetalle } from "./pages/docente/DocenteCursoDetalle";
 import { CalendarioDocente } from "./pages/docente/CalendarioDocente";
 import { PanelCalificaciones } from "./pages/docente/PanelCalificaciones";
 import { MensajeriaAnuncios } from "./pages/docente/MensajeriaAnuncios";
@@ -30,6 +31,7 @@ function App() {
         <Route element={<PrivateRoute allowedRole="docente" />}>
           <Route path="/docente/dashboard" element={<DashboardDocente />} />
           <Route path="/docente/cursos" element={<GestionCursos />} />
+          <Route path="/docente/cursos/:courseId" element={<DocenteCursoDetalle />} />
           <Route path="/docente/calendario" element={<CalendarioDocente />} />
           <Route path="/docente/calificaciones" element={<PanelCalificaciones />} />
           <Route path="/docente/mensajes" element={<MensajeriaAnuncios />} />
